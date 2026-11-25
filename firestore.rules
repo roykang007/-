@@ -1,0 +1,231 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core security primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        request.auth.token.email_verified == true &&
+        (
+          request.auth.token.email == 'roykang007@gmail.com' ||
+          exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        );
+    }
+
+    // Validation Blueprint: VoucherRate
+    function isValidRate(data) {
+      return data.keys().hasAll([
+          'brand', 'name', 'category', 'voucherType', 'denominations',
+          'buyRate', 'sellRate', 'changeDelta', 'status', 'note', 'sortOrder', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'brand', 'name', 'category', 'voucherType', 'denominations',
+          'buyRate', 'sellRate', 'changeDelta', 'status', 'note', 'sortOrder', 'updatedAt'
+        ]) &&
+        data.brand is string && data.brand.size() >= 1 && data.brand.size() <= 60 &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        data.category in ['department', 'mobile', 'culture', 'mart'] &&
+        data.voucherType in ['지류', '모바일', '핀번호', '기프트카드'] &&
+        data.denominations is string && data.denominations.size() >= 1 && data.denominations.size() <= 80 &&
+        data.buyRate is number && data.buyRate >= 50 && data.buyRate <= 100 &&
+        data.sellRate is number && data.sellRate >= 50 && data.sellRate <= 100 &&
+        data.changeDelta is number && data.changeDelta >= -20 && data.changeDelta <= 20 &&
+        data.status in ['매입가능', '우대매입', '일시중단'] &&
+        data.note is string && data.note.size() <= 160 &&
+        data.sortOrder is number && data.sortOrder >= 0 && data.sortOrder <= 999 &&
+        data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: CustomerInquiry
+    function isValidInquiry(data) {
+      return data.keys().hasAll([
+          'customerName', 'contact', 'inquiryType', 'voucherName', 'faceValue',
+          'quantity', 'estimatedPayout', 'channelPreference', 'message',
+          'status', 'adminMemo', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'customerName', 'contact', 'inquiryType', 'voucherName', 'faceValue',
+          'quantity', 'estimatedPayout', 'channelPreference', 'message',
+          'status', 'adminMemo', 'createdAt', 'updatedAt'
+        ]) &&
+        data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 50 &&
+        data.contact is string && data.contact.size() >= 4 && data.contact.size() <= 60 &&
+        data.inquiryType in ['매입 신청', '구매 문의', '법인·대량 문의', '기타 상담'] &&
+        data.voucherName is string && data.voucherName.size() >= 1 && data.voucherName.size() <= 100 &&
+        data.faceValue is number && data.faceValue >= 1000 && data.faceValue <= 1000000000 &&
+        data.quantity is number && data.quantity >= 1 && data.quantity <= 10000 &&
+        data.estimatedPayout is number && data.estimatedPayout >= 0 && data.estimatedPayout <= 1000000000 &&
+        data.channelPreference in ['카카오톡', '네이버 톡톡', '전화/문자'] &&
+        data.message is string && data.message.size() <= 1000 &&
+        data.status in ['접수대기', '상담중', '입금완료', '취소'] &&
+        data.adminMemo is string && data.adminMemo.size() <= 500 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: StoreSettings
+    function isValidStoreSettings(data) {
+      return data.keys().hasAll([
+          'blogTitle', 'noticeBanner', 'kakaoChannelUrl', 'kakaoChannelId',
+          'naverTalkUrl', 'phoneNumber', 'operatingHours', 'businessRegistration', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'blogTitle', 'noticeBanner', 'kakaoChannelUrl', 'kakaoChannelId',
+          'naverTalkUrl', 'phoneNumber', 'operatingHours', 'businessRegistration', 'updatedAt'
+        ]) &&
+        data.blogTitle is string && data.blogTitle.size() >= 1 && data.blogTitle.size() <= 80 &&
+        data.noticeBanner is string && data.noticeBanner.size() <= 200 &&
+        data.kakaoChannelUrl is string && data.kakaoChannelUrl.size() <= 250 &&
+        data.kakaoChannelId is string && data.kakaoChannelId.size() >= 1 && data.kakaoChannelId.size() <= 60 &&
+        data.naverTalkUrl is string && data.naverTalkUrl.size() <= 250 &&
+        data.phoneNumber is string && data.phoneNumber.size() >= 4 && data.phoneNumber.size() <= 40 &&
+        data.operatingHours is string && data.operatingHours.size() >= 1 && data.operatingHours.size() <= 100 &&
+        data.businessRegistration is string && data.businessRegistration.size() >= 1 && data.businessRegistration.size() <= 80 &&
+        data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: BlogPost
+    function isValidPost(data) {
+      return data.keys().hasAll([
+          'title', 'category', 'summary', 'content', 'imageKey',
+          'readMinutes', 'publishedDate', 'isPinned', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'title', 'category', 'summary', 'content', 'imageKey',
+          'readMinutes', 'publishedDate', 'isPinned', 'updatedAt'
+        ]) &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 140 &&
+        data.category in ['시세 리포트', '매입 가이드', '안전거래 안내', '공지사항'] &&
+        data.summary is string && data.summary.size() >= 1 && data.summary.size() <= 260 &&
+        data.content is string && data.content.size() >= 1 && data.content.size() <= 12000 &&
+        data.imageKey in ['department', 'mobile', 'culture', 'hero'] &&
+        data.readMinutes is number && data.readMinutes >= 1 && data.readMinutes <= 30 &&
+        data.publishedDate is string && data.publishedDate.size() >= 4 && data.publishedDate.size() <= 20 &&
+        data.isPinned is bool &&
+        data.updatedAt is timestamp;
+    }
+
+    // Collection: Live Voucher Rates
+    match /rates/{rateId} {
+      allow get: if isValidId(rateId);
+      allow list: if resource.data.status in ['매입가능', '우대매입', '일시중단'];
+      allow create: if isSignedIn() &&
+        isValidId(rateId) &&
+        isValidRate(incoming()) &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+      allow update: if isSignedIn() &&
+        isValidId(rateId) &&
+        isValidRate(incoming()) &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'brand', 'name', 'category', 'voucherType', 'denominations',
+          'buyRate', 'sellRate', 'changeDelta', 'status', 'note', 'sortOrder', 'updatedAt'
+        ]) &&
+        isAdmin();
+      allow delete: if isSignedIn() && isValidId(rateId) && isAdmin();
+    }
+
+    // Collection: Customer Inquiries (Strict PII Drop-Box)
+    match /inquiries/{inquiryId} {
+      allow get: if isSignedIn() && isValidId(inquiryId) && isAdmin();
+      allow list: if isSignedIn() &&
+        resource.data.status in ['접수대기', '상담중', '입금완료', '취소'] &&
+        isAdmin();
+      allow create: if isValidId(inquiryId) &&
+        isValidInquiry(incoming()) &&
+        incoming().status == '접수대기' &&
+        incoming().adminMemo == '' &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isSignedIn() &&
+        isValidId(inquiryId) &&
+        isValidInquiry(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().customerName == existing().customerName &&
+        incoming().contact == existing().contact &&
+        incoming().inquiryType == existing().inquiryType &&
+        incoming().voucherName == existing().voucherName &&
+        incoming().faceValue == existing().faceValue &&
+        incoming().quantity == existing().quantity &&
+        incoming().estimatedPayout == existing().estimatedPayout &&
+        incoming().channelPreference == existing().channelPreference &&
+        incoming().message == existing().message &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'adminMemo', 'updatedAt']) &&
+        isAdmin();
+      allow delete: if isSignedIn() && isValidId(inquiryId) && isAdmin();
+    }
+
+    // Collection: Store Settings (Public read for store contact info, admin write)
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId) && settingId == 'store';
+      allow list: if false;
+      allow create: if isSignedIn() &&
+        isValidId(settingId) &&
+        settingId == 'store' &&
+        isValidStoreSettings(incoming()) &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+      allow update: if isSignedIn() &&
+        isValidId(settingId) &&
+        settingId == 'store' &&
+        isValidStoreSettings(incoming()) &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'blogTitle', 'noticeBanner', 'kakaoChannelUrl', 'kakaoChannelId',
+          'naverTalkUrl', 'phoneNumber', 'operatingHours', 'businessRegistration', 'updatedAt'
+        ]) &&
+        isAdmin();
+      allow delete: if false;
+    }
+
+    // Collection: Naver Blog Guide Posts
+    match /posts/{postId} {
+      allow get: if isValidId(postId);
+      allow list: if resource.data.category in ['시세 리포트', '매입 가이드', '안전거래 안내', '공지사항'];
+      allow create: if isSignedIn() &&
+        isValidId(postId) &&
+        isValidPost(incoming()) &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+      allow update: if isSignedIn() &&
+        isValidId(postId) &&
+        isValidPost(incoming()) &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'category', 'summary', 'content', 'imageKey',
+          'readMinutes', 'publishedDate', 'isPinned', 'updatedAt'
+        ]) &&
+        isAdmin();
+      allow delete: if isSignedIn() && isValidId(postId) && isAdmin();
+    }
+
+    // Collection: Admin Registry (Read-only for self/admin, console-managed)
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId) && (request.auth.uid == adminId || isAdmin());
+      allow list, create, update, delete: if false;
+    }
+  }
+}

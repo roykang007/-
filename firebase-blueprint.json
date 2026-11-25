@@ -1,0 +1,329 @@
+{
+  "entities": {
+    "VoucherRate": {
+      "title": "VoucherRate",
+      "description": "실시간 상품권 매입 및 판매 시세 정보",
+      "type": "object",
+      "properties": {
+        "brand": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60,
+          "description": "발행 브랜드명 (예: 롯데백화점, 신세계백화점, 컬쳐랜드)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "상품권 상세 품목명"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["department", "mobile", "culture", "mart"],
+          "description": "상품권 카테고리 코드"
+        },
+        "voucherType": {
+          "type": "string",
+          "enum": ["지류", "모바일", "핀번호", "기프트카드"],
+          "description": "상품권 유형"
+        },
+        "denominations": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "취급 권종 안내"
+        },
+        "buyRate": {
+          "type": "number",
+          "description": "매입 시세율 (%)"
+        },
+        "sellRate": {
+          "type": "number",
+          "description": "판매 시세율 (%)"
+        },
+        "changeDelta": {
+          "type": "number",
+          "description": "전일 대비 시세 변동폭 (%p)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["매입가능", "우대매입", "일시중단"],
+          "description": "현재 거래 가능 상태"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "매입 조건 및 참고 메모"
+        },
+        "sortOrder": {
+          "type": "number",
+          "description": "시세표 정렬 순서"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "최종 시세 반영 시각 (서버 타임스탬프)"
+        }
+      },
+      "required": [
+        "brand",
+        "name",
+        "category",
+        "voucherType",
+        "denominations",
+        "buyRate",
+        "sellRate",
+        "changeDelta",
+        "status",
+        "note",
+        "sortOrder",
+        "updatedAt"
+      ]
+    },
+    "CustomerInquiry": {
+      "title": "CustomerInquiry",
+      "description": "고객 간편 매입/구매 신청 및 상담 문의 내역 (PII 포함, 관리자 전용 열람)",
+      "type": "object",
+      "properties": {
+        "customerName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "description": "신청자 성함 또는 닉네임"
+        },
+        "contact": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 60,
+          "description": "연락처 (휴대폰 번호 또는 카카오톡 ID)"
+        },
+        "inquiryType": {
+          "type": "string",
+          "enum": ["매입 신청", "구매 문의", "법인·대량 문의", "기타 상담"],
+          "description": "신청 유형"
+        },
+        "voucherName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "대상 상품권명"
+        },
+        "faceValue": {
+          "type": "number",
+          "description": "상품권 액면가 총액 (원)"
+        },
+        "quantity": {
+          "type": "number",
+          "description": "매수"
+        },
+        "estimatedPayout": {
+          "type": "number",
+          "description": "예상 정산 금액 (원)"
+        },
+        "channelPreference": {
+          "type": "string",
+          "enum": ["카카오톡", "네이버 톡톡", "전화/문자"],
+          "description": "희망 상담 채널"
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "상세 문의 및 입금 계좌/전달 메모"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["접수대기", "상담중", "입금완료", "취소"],
+          "description": "처리 상태"
+        },
+        "adminMemo": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "관리자 내부 처리 메모"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "접수 시각 (서버 타임스탬프)"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "최종 처리 시각 (서버 타임스탬프)"
+        }
+      },
+      "required": [
+        "customerName",
+        "contact",
+        "inquiryType",
+        "voucherName",
+        "faceValue",
+        "quantity",
+        "estimatedPayout",
+        "channelPreference",
+        "message",
+        "status",
+        "adminMemo",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "블로그 상담 채널 링크, 공지사항 및 영업 정보 설정",
+      "type": "object",
+      "properties": {
+        "blogTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "noticeBanner": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "kakaoChannelUrl": {
+          "type": "string",
+          "maxLength": 250
+        },
+        "kakaoChannelId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "naverTalkUrl": {
+          "type": "string",
+          "maxLength": 250
+        },
+        "phoneNumber": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 40
+        },
+        "operatingHours": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "businessRegistration": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "blogTitle",
+        "noticeBanner",
+        "kakaoChannelUrl",
+        "kakaoChannelId",
+        "naverTalkUrl",
+        "phoneNumber",
+        "operatingHours",
+        "businessRegistration",
+        "updatedAt"
+      ]
+    },
+    "BlogPost": {
+      "title": "BlogPost",
+      "description": "네이버 블로그 스타일 매입 가이드 및 시세 리포트 포스팅",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "category": {
+          "type": "string",
+          "enum": ["시세 리포트", "매입 가이드", "안전거래 안내", "공지사항"]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 260
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 12000
+        },
+        "imageKey": {
+          "type": "string",
+          "enum": ["department", "mobile", "culture", "hero"]
+        },
+        "readMinutes": {
+          "type": "number"
+        },
+        "publishedDate": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 20
+        },
+        "isPinned": {
+          "type": "boolean"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "title",
+        "category",
+        "summary",
+        "content",
+        "imageKey",
+        "readMinutes",
+        "publishedDate",
+        "isPinned",
+        "updatedAt"
+      ]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "관리자 권한 부여 사용자 문서",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["email", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/rates/{rateId}": {
+      "schema": { "$ref": "#/entities/VoucherRate" },
+      "description": "실시간 상품권 매입/판매 시세 목록 (공개 조회, 관리자 수정)"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/CustomerInquiry" },
+      "description": "고객 간편 신청 및 문의 내역 (공개 생성 전용, 관리자 전용 열람/수정/삭제)"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/StoreSettings" },
+      "description": "채널 링크 및 매장 공지 설정 (문서 ID: store)"
+    },
+    "/posts/{postId}": {
+      "schema": { "$ref": "#/entities/BlogPost" },
+      "description": "상품권 매입 가이드 및 블로그 포스팅"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "관리자 권한 레지스트리"
+    }
+  }
+}

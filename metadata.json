@@ -1,0 +1,8 @@
+{
+  "name": "청상품권 — 실시간 상품권 시세·매입 공식 블로그",
+  "description": "롯데·신세계·현대 백화점 상품권, 모바일 기프티콘, 문화상품권 실시간 매입 시세 조회, 자동 계산기, 간편 신청 및 관리자 시세 관리 블로그 플랫폼",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
